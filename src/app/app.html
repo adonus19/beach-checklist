@@ -54,11 +54,29 @@
 
       <div class="grid">
         @for (group of day.groups; track group.id) {
-          <section class="card glass" [class.card--done]="groupDone(group) === group.items.length">
+          <section
+            class="card glass"
+            [class.card--done]="group.items.length && groupDone(group) === group.items.length"
+            [class.card--editing]="isEditing(group.id)"
+          >
             <div class="card__head">
               <span class="card__emoji">{{ group.emoji }}</span>
               <h3 class="card__name">{{ group.name }}</h3>
-              <span class="card__count">{{ groupDone(group) }}/{{ group.items.length }}</span>
+              @if (isEditing(group.id)) {
+                <button type="button" class="edit-btn edit-btn--done" (click)="toggleEdit(group.id)">
+                  Done
+                </button>
+              } @else {
+                <span class="card__count">{{ groupDone(group) }}/{{ group.items.length }}</span>
+                <button
+                  type="button"
+                  class="edit-btn"
+                  (click)="toggleEdit(group.id)"
+                  [attr.aria-label]="'Edit ' + group.name"
+                >
+                  Edit
+                </button>
+              }
             </div>
             @if (group.note) {
               <p class="card__note">{{ group.note }}</p>
@@ -66,23 +84,63 @@
 
             <ul class="list">
               @for (item of group.items; track item.id) {
-                <li class="item" [class.item--done]="item.done">
-                  <button
-                    type="button"
-                    class="item__btn"
-                    (click)="toggle(item.id)"
-                    [attr.aria-pressed]="item.done"
-                  >
-                    <span class="check" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="14" height="14">
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                    </span>
-                    <span class="item__label">{{ item.label }}</span>
-                  </button>
-                </li>
+                @if (isEditing(group.id)) {
+                  <li class="item item--edit">
+                    <input
+                      type="text"
+                      class="edit-input"
+                      [value]="item.label"
+                      (input)="updateItemLabel(item.id, $event)"
+                      aria-label="Item name"
+                    />
+                    <button
+                      type="button"
+                      class="remove-btn"
+                      (click)="removeItem(item.id)"
+                      [attr.aria-label]="'Remove ' + item.label"
+                    >
+                      ✕
+                    </button>
+                  </li>
+                } @else {
+                  <li class="item" [class.item--done]="item.done">
+                    <button
+                      type="button"
+                      class="item__btn"
+                      (click)="toggle(item.id)"
+                      [attr.aria-pressed]="item.done"
+                    >
+                      <span class="check" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="14" height="14">
+                          <path d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                      <span class="item__label">{{ item.label }}</span>
+                    </button>
+                  </li>
+                }
+              } @empty {
+                @if (!isEditing(group.id)) {
+                  <li class="item item--empty">Nothing here yet — tap Edit to add items.</li>
+                }
               }
             </ul>
+
+            @if (isEditing(group.id)) {
+              <div class="add-row">
+                <input
+                  #newItem
+                  type="text"
+                  class="add-input"
+                  placeholder="Add an item…"
+                  (keyup.enter)="addItem(group.id, newItem)"
+                  aria-label="New item"
+                />
+                <button type="button" class="add-btn" (click)="addItem(group.id, newItem)">
+                  Add
+                </button>
+              </div>
+            }
           </section>
         }
       </div>

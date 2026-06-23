@@ -1,29 +1,25 @@
 import { Component, computed, effect, signal } from '@angular/core';
 import { buildPlan } from './data';
-import { Day } from './models';
+import { Day, Group } from './models';
 
-const STORAGE_KEY = 'beach-checklist:v1';
+const STORAGE_KEY = 'beach-checklist:data:v1';
 
-/** Read the saved { itemId: done } map from localStorage. */
-function loadDoneMap(): Record<string, boolean> {
+/**
+ * Load the saved list structure from localStorage. Returns null on first run
+ * (or if anything is corrupt) so we fall back to the seed plan in data.ts.
+ */
+function loadSaved(): Day[] | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+    const parsed = raw ? (JSON.parse(raw) as Day[]) : null;
+    return Array.isArray(parsed) && parsed.length ? parsed : null;
   } catch {
-    return {};
+    return null;
   }
 }
 
-/** Apply the saved done-state onto the plan definitions. */
-function hydrate(data: Day[]): Day[] {
-  const saved = loadDoneMap();
-  return data.map((d) => ({
-    ...d,
-    groups: d.groups.map((g) => ({
-      ...g,
-      items: g.items.map((i) => ({ ...i, done: saved[i.id] ?? i.done })),
-    })),
-  }));
+function uid(): string {
+  return crypto?.randomUUID ? crypto.randomUUID() : `id-${Date.now()}-${Math.random()}`;
 }
 
 @Component({
@@ -33,19 +29,16 @@ function hydrate(data: Day[]): Day[] {
   styleUrl: './app.scss',
 })
 export class App {
-  readonly days = signal<Day[]>(hydrate(buildPlan()));
+  readonly days = signal<Day[]>(loadSaved() ?? buildPlan());
+
+  /** Which card (group id) is currently in edit mode — only one at a time. */
+  readonly editingGroupId = signal<string | null>(null);
 
   constructor() {
-    // Persist the checked-state to localStorage whenever it changes.
+    // Persist the full list structure whenever it changes.
     effect(() => {
-      const map: Record<string, boolean> = {};
-      for (const d of this.days()) {
-        for (const g of d.groups) {
-          for (const i of g.items) map[i.id] = i.done;
-        }
-      }
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.days()));
       } catch {
         /* storage full or unavailable — ignore */
       }
@@ -94,33 +87,67 @@ export class App {
     );
   }
 
-  groupDone(group: { items: { done: boolean }[] }): number {
+  groupDone(group: Group): number {
     return group.items.filter((i) => i.done).length;
   }
 
+  // ----- Checking off -----
+
   toggle(itemId: string): void {
-    this.days.update((days) =>
-      days.map((d) => ({
-        ...d,
-        groups: d.groups.map((g) => ({
-          ...g,
-          items: g.items.map((i) =>
-            i.id === itemId ? { ...i, done: !i.done } : i,
-          ),
-        })),
-      })),
+    this.mutateItems((items) =>
+      items.map((i) => (i.id === itemId ? { ...i, done: !i.done } : i)),
     );
   }
 
   resetAll(): void {
     if (!confirm('Uncheck every item and start fresh?')) return;
+    this.mutateItems((items) => items.map((i) => ({ ...i, done: false })));
+  }
+
+  // ----- Editing -----
+
+  isEditing(groupId: string): boolean {
+    return this.editingGroupId() === groupId;
+  }
+
+  toggleEdit(groupId: string): void {
+    this.editingGroupId.update((cur) => (cur === groupId ? null : groupId));
+  }
+
+  updateItemLabel(itemId: string, event: Event): void {
+    const label = (event.target as HTMLInputElement).value;
+    this.mutateItems((items) =>
+      items.map((i) => (i.id === itemId ? { ...i, label } : i)),
+    );
+  }
+
+  removeItem(itemId: string): void {
+    this.mutateItems((items) => items.filter((i) => i.id !== itemId));
+  }
+
+  addItem(groupId: string, input: HTMLInputElement): void {
+    const label = input.value.trim();
+    if (!label) return;
     this.days.update((days) =>
       days.map((d) => ({
         ...d,
-        groups: d.groups.map((g) => ({
-          ...g,
-          items: g.items.map((i) => ({ ...i, done: false })),
-        })),
+        groups: d.groups.map((g) =>
+          g.id === groupId
+            ? { ...g, items: [...g.items, { id: uid(), label, done: false }] }
+            : g,
+        ),
+      })),
+    );
+    input.value = '';
+    input.focus();
+  }
+
+  /** Apply a transform to every item list across all days/groups, immutably. */
+  private mutateItems(fn: (items: Group['items']) => Group['items']): void {
+    this.days.update((days) =>
+      days.map((d) => ({
+        ...d,
+        groups: d.groups.map((g) => ({ ...g, items: fn(g.items) })),
       })),
     );
   }

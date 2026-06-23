@@ -74,6 +74,53 @@
   color: var(--text-dim);
 }
 
+/* "Which list am I on" — pinned in the sticky header */
+.hero__current {
+  margin: 12px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 6px 13px 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--glass-border);
+  font-size: 0.8rem;
+  line-height: 1;
+  animation: chip-in 0.3s var(--ease) both;
+}
+
+.hero__current-emoji {
+  font-size: 1rem;
+}
+
+.hero__current-day {
+  color: var(--text-faint);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hero__current-day::after {
+  content: '·';
+  margin-left: 8px;
+  color: var(--text-faint);
+}
+
+.hero__current-group {
+  color: var(--text);
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
 /* Progress ring */
 .ring {
   position: relative;
@@ -301,6 +348,55 @@
   align-items: center;
   gap: 8px;
   padding: 5px 0;
+  background: transparent;
+}
+
+.drag-handle {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: none;
+  background: none;
+  color: var(--text-faint);
+  cursor: grab;
+  touch-action: none; /* let CDK own the touch gesture */
+  border-radius: 8px;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle svg {
+  fill: currentColor;
+}
+
+/* CDK drag-and-drop states */
+.cdk-drag-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: rgba(40, 24, 60, 0.92);
+  border: 1px solid var(--sun-gold);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.35;
+}
+
+.cdk-drag-animating {
+  transition: transform 0.2s var(--ease);
+}
+
+.list.cdk-drop-list-dragging .item--edit:not(.cdk-drag-placeholder) {
+  transition: transform 0.2s var(--ease);
 }
 
 .edit-input {

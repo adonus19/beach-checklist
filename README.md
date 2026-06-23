@@ -11,7 +11,31 @@ A beautiful, fast, installable checklist app to help the family pack everything 
 
 ```bash
 npm install
+cp src/environments/firebase.config.example.ts src/environments/firebase.config.ts
+# paste your Firebase web config into firebase.config.ts (it is gitignored)
 npm start          # http://localhost:4200
+```
+
+## Firebase config & secrets
+
+The Firebase web config lives in `src/environments/firebase.config.ts`, which is
+**gitignored** and never committed. Locally you create it from the example file.
+In CI it is generated from a GitHub Actions secret.
+
+> A Firebase **web** config (apiKey, appId, …) is **not a secret** — it ships in
+> the public client bundle by design and cannot be hidden on a static site.
+> Keeping it out of source is just hygiene. Your data is actually protected by:
+> 1. **Firestore security rules** ([firestore.rules](firestore.rules)).
+> 2. **API key restrictions** in Google Cloud Console → APIs & Services →
+>    Credentials → your Browser key → *Application restrictions: HTTP referrers*,
+>    allowing `https://adonus19.github.io/*` and `http://localhost:4200/*`.
+
+To set the CI secret: repo **Settings → Secrets and variables → Actions → New
+repository secret**, name `FIREBASE_CONFIG`, value = the config as one JSON
+object:
+
+```json
+{ "apiKey": "…", "authDomain": "…", "projectId": "…", "storageBucket": "…", "messagingSenderId": "…", "appId": "…", "measurementId": "…" }
 ```
 
 ## Editing the list

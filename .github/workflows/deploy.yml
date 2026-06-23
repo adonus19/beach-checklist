@@ -28,6 +28,17 @@ jobs:
 
       - run: npm ci
 
+      # Generate the gitignored Firebase config from the repo secret.
+      # FIREBASE_CONFIG is the web config as a JSON object, e.g.
+      # {"apiKey":"...","authDomain":"...","projectId":"...", ...}
+      - name: Inject Firebase config
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+        run: |
+          mkdir -p src/environments
+          printf 'export const firebaseConfig = %s as const;\n' "$FIREBASE_CONFIG" \
+            > src/environments/firebase.config.ts
+
       # base-href must match the repo name for project pages.
       - run: npx ng build --base-href=/beach-checklist/
 

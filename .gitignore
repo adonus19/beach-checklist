@@ -39,6 +39,9 @@ testem.log
 /typings
 __screenshots__/
 
+# Secrets / local config (generated from CI secret or copied from the example)
+/src/environments/firebase.config.ts
+
 # System files
 .DS_Store
 Thumbs.db

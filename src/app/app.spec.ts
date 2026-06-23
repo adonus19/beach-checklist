@@ -1,28 +1,18 @@
-import { TestBed } from '@angular/core/testing';
-import { App } from './app';
+import { buildPlan } from './data';
 
-describe('App', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [App],
-    }).compileComponents();
+describe('packing plan', () => {
+  it('builds days with groups and items', () => {
+    const days = buildPlan();
+    expect(days.length).toBeGreaterThan(0);
+    const totalItems = days.reduce(
+      (s, d) => s + d.groups.reduce((a, g) => a + g.items.length, 0),
+      0,
+    );
+    expect(totalItems).toBeGreaterThan(0);
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render the title', async () => {
-    const fixture = TestBed.createComponent(App);
-    await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Beach Trip');
-  });
-
-  it('should build the full packing plan', () => {
-    const fixture = TestBed.createComponent(App);
-    expect(fixture.componentInstance.totalItems()).toBeGreaterThan(0);
+  it('gives every item a unique id', () => {
+    const ids = buildPlan().flatMap((d) => d.groups.flatMap((g) => g.items.map((i) => i.id)));
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });

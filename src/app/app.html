@@ -5,15 +5,16 @@
       <p class="hero__eyebrow">Pack smart · stay chill</p>
       <h1 class="hero__title">Beach Trip</h1>
       <p class="hero__sub">
-        @if (allPacked()) {
+        @if (store.allPacked()) {
           All packed — let's go! 🌊
         } @else {
-          {{ doneItems() }} of {{ totalItems() }} packed · {{ totalItems() - doneItems() }} to go
+          {{ store.doneItems() }} of {{ store.totalItems() }} packed ·
+          {{ store.totalItems() - store.doneItems() }} to go
         }
       </p>
     </div>
 
-    <div class="ring" role="img" [attr.aria-label]="progress() + '% packed'">
+    <div class="ring" role="img" [attr.aria-label]="store.progress() + '% packed'">
       <svg viewBox="0 0 80 80" width="80" height="80">
         <defs>
           <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -29,17 +30,17 @@
           cx="40"
           cy="40"
           r="34"
-          [style.stroke-dasharray]="ringCircumference"
-          [style.stroke-dashoffset]="ringOffset()"
+          [style.stroke-dasharray]="store.ringCircumference"
+          [style.stroke-dashoffset]="store.ringOffset()"
         />
       </svg>
-      <span class="ring__label">{{ progress() }}<small>%</small></span>
+      <span class="ring__label">{{ store.progress() }}<small>%</small></span>
     </div>
   </header>
 
   <!-- Day by day -->
-  @for (day of days(); track day.id) {
-    <section class="day" [class.day--done]="dayDone(day) === dayTotal(day)">
+  @for (day of store.days(); track day.id) {
+    <section class="day" [class.day--done]="store.dayDone(day) === store.dayTotal(day)">
       <div class="day__head">
         <span class="day__emoji">{{ day.emoji }}</span>
         <div class="day__titles">
@@ -49,14 +50,14 @@
             <p class="day__note">{{ day.note }}</p>
           }
         </div>
-        <span class="day__count">{{ dayDone(day) }}/{{ dayTotal(day) }}</span>
+        <span class="day__count">{{ store.dayDone(day) }}/{{ store.dayTotal(day) }}</span>
       </div>
 
       <div class="grid">
         @for (group of day.groups; track group.id) {
           <section
             class="card glass"
-            [class.card--done]="group.items.length && groupDone(group) === group.items.length"
+            [class.card--done]="group.items.length && store.groupDone(group) === group.items.length"
             [class.card--editing]="isEditing(group.id)"
           >
             <div class="card__head">
@@ -67,7 +68,7 @@
                   Done
                 </button>
               } @else {
-                <span class="card__count">{{ groupDone(group) }}/{{ group.items.length }}</span>
+                <span class="card__count">{{ store.groupDone(group) }}/{{ group.items.length }}</span>
                 <button
                   type="button"
                   class="edit-btn"
@@ -90,13 +91,13 @@
                       type="text"
                       class="edit-input"
                       [value]="item.label"
-                      (input)="updateItemLabel(item.id, $event)"
+                      (input)="store.updateItemLabel(item.id, $event)"
                       aria-label="Item name"
                     />
                     <button
                       type="button"
                       class="remove-btn"
-                      (click)="removeItem(item.id)"
+                      (click)="store.removeItem(item.id)"
                       [attr.aria-label]="'Remove ' + item.label"
                     >
                       ✕
@@ -107,7 +108,7 @@
                     <button
                       type="button"
                       class="item__btn"
-                      (click)="toggle(item.id)"
+                      (click)="store.toggle(item.id)"
                       [attr.aria-pressed]="item.done"
                     >
                       <span class="check" aria-hidden="true">
@@ -133,10 +134,10 @@
                   type="text"
                   class="add-input"
                   placeholder="Add an item…"
-                  (keyup.enter)="addItem(group.id, newItem)"
+                  (keyup.enter)="store.addItem(group.id, newItem)"
                   aria-label="New item"
                 />
-                <button type="button" class="add-btn" (click)="addItem(group.id, newItem)">
+                <button type="button" class="add-btn" (click)="store.addItem(group.id, newItem)">
                   Add
                 </button>
               </div>
@@ -148,7 +149,15 @@
   }
 
   <footer class="footer">
-    <button type="button" class="reset" (click)="resetAll()">Reset all</button>
-    <p class="footer__note">Saved on this device · ready for offline</p>
+    <button type="button" class="reset" (click)="store.resetAll()">Reset all</button>
+    <p class="footer__note">
+      @if (!store.online()) {
+        Offline · changes sync when you reconnect
+      } @else if (store.synced()) {
+        Synced for everyone · ready offline
+      } @else {
+        Connecting…
+      }
+    </p>
   </footer>
 </div>

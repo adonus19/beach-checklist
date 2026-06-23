@@ -1,0 +1,12 @@
+rules_version = '2';
+
+// Beach Trip Checklist — shared family list.
+// Access requires an (anonymous) signed-in session. The web config is public,
+// so these rules are what actually gate read/write.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /lists/{listId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

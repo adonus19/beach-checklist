@@ -487,6 +487,151 @@
   transform: scale(0.96);
 }
 
+/* ===== Grouping / layout editing ===== */
+.edit-btn--danger {
+  color: #ff9c9c;
+  background: rgba(255, 90, 90, 0.14);
+  border-color: rgba(255, 120, 120, 0.4);
+}
+
+.edit-btn--danger:hover {
+  background: rgba(255, 90, 90, 0.3);
+  color: #fff;
+}
+
+/* Small square input that holds a single emoji */
+.emoji-input {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 40px;
+  text-align: center;
+  font-size: 1.25rem;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text);
+}
+
+.emoji-input:focus {
+  outline: none;
+  border-color: var(--sun-gold);
+}
+
+.section-name-input,
+.section-theme-input,
+.card-name-input {
+  width: 100%;
+  padding: 8px 11px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  font: inherit;
+}
+
+.section-name-input {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.section-theme-input {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.card-name-input {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+}
+
+.section-name-input:focus,
+.section-theme-input:focus,
+.card-name-input:focus {
+  outline: none;
+  border-color: var(--sun-gold);
+}
+
+.day--editing .day__head {
+  align-items: flex-start;
+  gap: 10px;
+}
+
+/* "Add a list" — a dashed tile sitting in the card grid */
+.add-card-btn {
+  min-height: 90px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--glass-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+
+.add-card-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  border-color: var(--sun-gold);
+}
+
+/* "Add a section" — full-width dashed button */
+.add-section-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--glass-border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-dim);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s var(--ease),
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+
+.add-section-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text);
+  border-color: var(--sun-gold);
+}
+
+/* ===== Update available toast ===== */
+.update-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 50;
+  padding: 13px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--accent-grad);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 14px 40px -10px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  animation: chip-in 0.35s var(--ease) both;
+}
+
+.update-toast:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
 /* ===== Items ===== */
 .list {
   list-style: none;

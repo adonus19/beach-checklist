@@ -123,6 +123,60 @@ export class ListStore {
     });
   }
 
+  // ----- Sections (days/people) -----
+
+  addSection(): string {
+    const id = uid();
+    this.days.update((days) => [
+      ...days,
+      { id, name: 'New section', theme: '', emoji: '📦', groups: [] },
+    ]);
+    this.scheduleSave();
+    return id;
+  }
+
+  updateSection(id: string, patch: Partial<Pick<Day, 'name' | 'theme' | 'emoji' | 'note'>>): void {
+    this.days.update((days) => days.map((d) => (d.id === id ? { ...d, ...patch } : d)));
+    this.scheduleSave();
+  }
+
+  removeSection(id: string): void {
+    this.days.update((days) => days.filter((d) => d.id !== id));
+    this.scheduleSave();
+  }
+
+  // ----- Cards (groups) -----
+
+  addGroup(sectionId: string): string {
+    const id = uid();
+    this.days.update((days) =>
+      days.map((d) =>
+        d.id === sectionId
+          ? { ...d, groups: [...d.groups, { id, name: 'New list', emoji: '📦', items: [] }] }
+          : d,
+      ),
+    );
+    this.scheduleSave();
+    return id;
+  }
+
+  updateGroup(id: string, patch: Partial<Pick<Group, 'name' | 'emoji' | 'note'>>): void {
+    this.days.update((days) =>
+      days.map((d) => ({
+        ...d,
+        groups: d.groups.map((g) => (g.id === id ? { ...g, ...patch } : g)),
+      })),
+    );
+    this.scheduleSave();
+  }
+
+  removeGroup(id: string): void {
+    this.days.update((days) =>
+      days.map((d) => ({ ...d, groups: d.groups.filter((g) => g.id !== id) })),
+    );
+    this.scheduleSave();
+  }
+
   // ----- internals -----
 
   private mutateItems(fn: (items: Group['items']) => Group['items']): void {

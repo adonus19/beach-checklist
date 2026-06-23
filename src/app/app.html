@@ -45,19 +45,65 @@
     </div>
   </header>
 
-  <!-- Day by day -->
+  <!-- Sections (days / people) -->
   @for (day of store.days(); track day.id) {
-    <section class="day" [class.day--done]="store.dayDone(day) === store.dayTotal(day)">
+    <section
+      class="day"
+      [class.day--done]="store.dayTotal(day) && store.dayDone(day) === store.dayTotal(day)"
+      [class.day--editing]="isEditingSection(day.id)"
+    >
       <div class="day__head">
-        <span class="day__emoji">{{ day.emoji }}</span>
-        <div class="day__titles">
-          <p class="day__eyebrow">{{ day.name }}</p>
-          <h2 class="day__theme">{{ day.theme }}</h2>
-          @if (day.note) {
-            <p class="day__note">{{ day.note }}</p>
-          }
-        </div>
-        <span class="day__count">{{ store.dayDone(day) }}/{{ store.dayTotal(day) }}</span>
+        @if (isEditingSection(day.id)) {
+          <input
+            class="emoji-input"
+            [value]="day.emoji"
+            (input)="store.updateSection(day.id, { emoji: $any($event.target).value })"
+            maxlength="4"
+            aria-label="Section emoji"
+          />
+          <div class="day__titles">
+            <input
+              class="section-name-input"
+              [value]="day.name"
+              (input)="store.updateSection(day.id, { name: $any($event.target).value })"
+              placeholder="Section name (e.g. Lucy)"
+              aria-label="Section name"
+            />
+            <input
+              class="section-theme-input"
+              [value]="day.theme"
+              (input)="store.updateSection(day.id, { theme: $any($event.target).value })"
+              placeholder="Subtitle (optional)"
+              aria-label="Section subtitle"
+            />
+          </div>
+          <button type="button" class="edit-btn edit-btn--danger" (click)="removeSection(day.id)">
+            Delete
+          </button>
+          <button type="button" class="edit-btn edit-btn--done" (click)="toggleEditSection(day.id)">
+            Done
+          </button>
+        } @else {
+          <span class="day__emoji">{{ day.emoji }}</span>
+          <div class="day__titles">
+            <p class="day__eyebrow">{{ day.name }}</p>
+            @if (day.theme) {
+              <h2 class="day__theme">{{ day.theme }}</h2>
+            }
+            @if (day.note) {
+              <p class="day__note">{{ day.note }}</p>
+            }
+          </div>
+          <span class="day__count">{{ store.dayDone(day) }}/{{ store.dayTotal(day) }}</span>
+          <button
+            type="button"
+            class="edit-btn"
+            (click)="toggleEditSection(day.id)"
+            [attr.aria-label]="'Edit section ' + day.name"
+          >
+            Edit
+          </button>
+        }
       </div>
 
       <div class="grid">
@@ -71,13 +117,35 @@
             [attr.data-emoji]="group.emoji"
           >
             <div class="card__head">
-              <span class="card__emoji">{{ group.emoji }}</span>
-              <h3 class="card__name">{{ group.name }}</h3>
               @if (isEditing(group.id)) {
+                <input
+                  class="emoji-input"
+                  [value]="group.emoji"
+                  (input)="store.updateGroup(group.id, { emoji: $any($event.target).value })"
+                  maxlength="4"
+                  aria-label="List emoji"
+                />
+                <input
+                  class="card-name-input"
+                  [value]="group.name"
+                  (input)="store.updateGroup(group.id, { name: $any($event.target).value })"
+                  placeholder="List name"
+                  aria-label="List name"
+                />
+                <button
+                  type="button"
+                  class="edit-btn edit-btn--danger"
+                  (click)="removeGroup(group.id)"
+                  aria-label="Delete list"
+                >
+                  Delete
+                </button>
                 <button type="button" class="edit-btn edit-btn--done" (click)="toggleEdit(group.id)">
                   Done
                 </button>
               } @else {
+                <span class="card__emoji">{{ group.emoji }}</span>
+                <h3 class="card__name">{{ group.name }}</h3>
                 <span class="card__count">{{ store.groupDone(group) }}/{{ group.items.length }}</span>
                 <button
                   type="button"
@@ -164,9 +232,19 @@
             }
           </section>
         }
+
+        @if (isEditingSection(day.id)) {
+          <button type="button" class="add-card-btn" (click)="addGroupTo(day.id)">
+            ＋ Add a list
+          </button>
+        }
       </div>
     </section>
   }
+
+  <button type="button" class="add-section-btn" (click)="addSection()">
+    ＋ Add a section (e.g. a person)
+  </button>
 
   <footer class="footer">
     <button type="button" class="reset" (click)="store.resetAll()">Reset all</button>
@@ -181,3 +259,9 @@
     </p>
   </footer>
 </div>
+
+@if (updates.updateReady()) {
+  <button type="button" class="update-toast" (click)="updates.apply()">
+    ✨ New version available — tap to refresh
+  </button>
+}

@@ -1,0 +1,96 @@
+<div class="shell">
+  <!-- Header -->
+  <header class="hero glass">
+    <div class="hero__text">
+      <p class="hero__eyebrow">Pack smart · stay chill</p>
+      <h1 class="hero__title">Beach Trip</h1>
+      <p class="hero__sub">
+        @if (allPacked()) {
+          All packed — let's go! 🌊
+        } @else {
+          {{ doneItems() }} of {{ totalItems() }} packed · {{ totalItems() - doneItems() }} to go
+        }
+      </p>
+    </div>
+
+    <div class="ring" role="img" [attr.aria-label]="progress() + '% packed'">
+      <svg viewBox="0 0 80 80" width="80" height="80">
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#ffc24d" />
+            <stop offset="45%" stop-color="#ff7a2f" />
+            <stop offset="75%" stop-color="#ff6fa5" />
+            <stop offset="100%" stop-color="#8a63d6" />
+          </linearGradient>
+        </defs>
+        <circle class="ring__track" cx="40" cy="40" r="34" />
+        <circle
+          class="ring__value"
+          cx="40"
+          cy="40"
+          r="34"
+          [style.stroke-dasharray]="ringCircumference"
+          [style.stroke-dashoffset]="ringOffset()"
+        />
+      </svg>
+      <span class="ring__label">{{ progress() }}<small>%</small></span>
+    </div>
+  </header>
+
+  <!-- Day by day -->
+  @for (day of days(); track day.id) {
+    <section class="day" [class.day--done]="dayDone(day) === dayTotal(day)">
+      <div class="day__head">
+        <span class="day__emoji">{{ day.emoji }}</span>
+        <div class="day__titles">
+          <p class="day__eyebrow">{{ day.name }}</p>
+          <h2 class="day__theme">{{ day.theme }}</h2>
+          @if (day.note) {
+            <p class="day__note">{{ day.note }}</p>
+          }
+        </div>
+        <span class="day__count">{{ dayDone(day) }}/{{ dayTotal(day) }}</span>
+      </div>
+
+      <div class="grid">
+        @for (group of day.groups; track group.id) {
+          <section class="card glass" [class.card--done]="groupDone(group) === group.items.length">
+            <div class="card__head">
+              <span class="card__emoji">{{ group.emoji }}</span>
+              <h3 class="card__name">{{ group.name }}</h3>
+              <span class="card__count">{{ groupDone(group) }}/{{ group.items.length }}</span>
+            </div>
+            @if (group.note) {
+              <p class="card__note">{{ group.note }}</p>
+            }
+
+            <ul class="list">
+              @for (item of group.items; track item.id) {
+                <li class="item" [class.item--done]="item.done">
+                  <button
+                    type="button"
+                    class="item__btn"
+                    (click)="toggle(item.id)"
+                    [attr.aria-pressed]="item.done"
+                  >
+                    <span class="check" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="14" height="14">
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    <span class="item__label">{{ item.label }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        }
+      </div>
+    </section>
+  }
+
+  <footer class="footer">
+    <button type="button" class="reset" (click)="resetAll()">Reset all</button>
+    <p class="footer__note">Saved on this device · ready for offline</p>
+  </footer>
+</div>

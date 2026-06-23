@@ -1,0 +1,134 @@
+/* ===== Beach Trip Checklist — global styles ===== */
+
+:root {
+  /* Ocean Sunset · Dark */
+  --bg-base: #170d28;
+  --bg-base-2: #1a0f2e;
+
+  /* Sunset palette — warm sun to cool night */
+  --sun-gold: #ffc24d;
+  --burnt-orange: #ff7a2f;
+  --coral: #ff6b54;
+  --coral-deep: #ff5e7e;
+  --pink: #ff6fa5;
+  --sky: #4ea3da; /* thick sky blue */
+  --sky-deep: #3d7fc4;
+  --violet: #8a63d6;
+  --deep-purple: #2a1550;
+
+  --text: #fbf6ff;
+  --text-dim: #d6cbe8;
+  --text-faint: #a294be;
+
+  /* Glass tokens — smoked dark glass so text stays crisp over bright bands */
+  --glass-bg: rgba(26, 15, 42, 0.34);
+  --glass-bg-strong: rgba(26, 15, 42, 0.5);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 20px 55px -20px rgba(0, 0, 0, 0.7);
+
+  --accent-grad: linear-gradient(120deg, var(--sun-gold) 0%, var(--burnt-orange) 38%, var(--pink) 70%, var(--violet) 100%);
+  --warm-grad: linear-gradient(135deg, var(--sun-gold) 0%, var(--burnt-orange) 100%);
+
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* ===== Animated sunset backdrop — fixed so it never scrolls ===== */
+/* Desktop: sun in the top-left, sky blue mid, violet → deep purple to the far side. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -15%;
+  z-index: -2;
+  background:
+    /* warm sun glow blooming from the bright corner */
+    radial-gradient(55vmax 48vmax at 6% 4%, rgba(255, 184, 71, 0.7), transparent 55%),
+    radial-gradient(40vmax 36vmax at 20% 16%, rgba(255, 122, 47, 0.55), transparent 60%),
+    /* the banded sunset itself */
+    linear-gradient(
+      118deg,
+      #ff8a3d 0%,
+      #ff6f6f 18%,
+      #d9608f 32%,
+      #5e8fc9 50%,
+      #4e72c4 64%,
+      #6b4fb0 78%,
+      #2a1550 92%,
+      #1a0c30 100%
+    );
+  background-color: var(--bg-base);
+  filter: saturate(125%);
+  animation: drift 28s var(--ease) infinite alternate;
+}
+
+/* Soft vignette so the glass reads richer */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(130vmax 80vmax at 100% 100%, rgba(10, 5, 22, 0.6), transparent 55%),
+    radial-gradient(120vmax 70vmax at 50% 0%, transparent 55%, rgba(10, 5, 20, 0.4) 100%);
+  pointer-events: none;
+}
+
+/* Mobile / portrait: bright at the top, deep purple at the bottom. */
+@media (max-width: 700px) {
+  body::before {
+    background:
+      radial-gradient(60vmax 42vmax at 50% -4%, rgba(255, 184, 71, 0.75), transparent 58%),
+      radial-gradient(48vmax 34vmax at 30% 6%, rgba(255, 122, 47, 0.55), transparent 62%),
+      linear-gradient(
+        180deg,
+        #ff8a3d 0%,
+        #ff6f6f 16%,
+        #d9608f 30%,
+        #5e8fc9 50%,
+        #4e72c4 64%,
+        #6b4fb0 80%,
+        #2a1550 92%,
+        #1a0c30 100%
+      );
+    background-color: var(--bg-base);
+    filter: saturate(125%);
+  }
+}
+
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-2%, -2%, 0) scale(1.07);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}

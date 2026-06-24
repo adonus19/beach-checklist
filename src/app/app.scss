@@ -755,6 +755,13 @@
   margin: 0;
   font-size: 0.76rem;
   color: var(--text-faint);
+  text-align: center;
+  max-width: 90vw;
+}
+
+.footer__note--error {
+  color: var(--gold);
+  font-weight: 600;
 }
 
 @media (max-width: 520px) {

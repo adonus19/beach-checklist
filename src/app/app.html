@@ -248,11 +248,13 @@
 
   <footer class="footer">
     <button type="button" class="reset" (click)="store.resetAll()">Reset all</button>
-    <p class="footer__note">
+    <p class="footer__note" [class.footer__note--error]="!!store.syncError() && store.online()">
       @if (!store.online()) {
         Offline · changes sync when you reconnect
       } @else if (store.synced()) {
         Synced for everyone · ready offline
+      } @else if (store.syncError()) {
+        ⚠️ Sync blocked — {{ store.syncError() }}
       } @else {
         Connecting…
       }

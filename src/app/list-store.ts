@@ -31,6 +31,7 @@ export class ListStore {
   /** Connection state, surfaced in the UI. */
   readonly online = signal<boolean>(navigator.onLine);
   readonly synced = signal<boolean>(false);
+  readonly syncError = signal<string | null>(null);
 
   private readonly docRef: DocumentReference = doc(db, DOC_PATH.collection, DOC_PATH.id);
   private saveTimer: ReturnType<typeof setTimeout> | undefined;
@@ -200,7 +201,9 @@ export class ListStore {
     try {
       await signInAnonymously(auth);
     } catch (err) {
+      const e = err as { code?: string; message?: string };
       console.warn('[beach] anonymous sign-in failed; running local-only', err);
+      this.syncError.set(`Sign-in: ${e.code ?? e.message ?? 'failed'}`);
       return;
     }
 
@@ -208,6 +211,7 @@ export class ListStore {
       this.docRef,
       (snap) => {
         this.synced.set(true);
+        this.syncError.set(null);
         const data = snap.data() as { days?: Day[] } | undefined;
         if (snap.exists() && Array.isArray(data?.days)) {
           // Don't clobber what the user is mid-edit with our own pending echo:
@@ -220,7 +224,12 @@ export class ListStore {
           this.scheduleSave(true);
         }
       },
-      (err) => console.warn('[beach] snapshot error', err),
+      (err) => {
+        const e = err as { code?: string; message?: string };
+        console.warn('[beach] snapshot error', err);
+        this.synced.set(false);
+        this.syncError.set(`Firestore: ${e.code ?? e.message ?? 'connection blocked'}`);
+      },
     );
   }
 

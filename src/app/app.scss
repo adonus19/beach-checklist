@@ -46,6 +46,12 @@
   z-index: 30;
 }
 
+/* Text column must be allowed to shrink so the ring always keeps its space */
+.hero__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .hero__eyebrow {
   margin: 0 0 6px;
   font-size: 0.72rem;
@@ -109,6 +115,7 @@
 .hero__current-group {
   color: var(--text);
   font-weight: 800;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -584,17 +591,17 @@
   border-color: var(--sun-gold);
 }
 
-/* "Add a section" — full-width dashed button */
+/* "Add a section" — prominent full-width button so it's easy to find */
 .add-section-btn {
   width: 100%;
-  padding: 16px;
+  padding: 18px;
   border-radius: var(--radius-lg);
-  border: 1.5px dashed var(--glass-border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-dim);
+  border: 1.5px solid rgba(255, 194, 77, 0.5);
+  background: rgba(255, 194, 77, 0.12);
+  color: var(--sun-gold);
   font: inherit;
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 800;
+  font-size: 1rem;
   cursor: pointer;
   transition:
     background 0.2s var(--ease),
@@ -603,9 +610,12 @@
 }
 
 .add-section-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--text);
+  background: rgba(255, 194, 77, 0.2);
   border-color: var(--sun-gold);
+}
+
+.add-section-btn:active {
+  transform: scale(0.99);
 }
 
 /* ===== Update available toast ===== */

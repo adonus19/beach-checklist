@@ -29,15 +29,31 @@ jobs:
       - run: npm ci
 
       # Generate the gitignored Firebase config from the repo secret.
-      # FIREBASE_CONFIG is the web config as a JSON object, e.g.
+      # FIREBASE_CONFIG must be a single JSON object, e.g.
       # {"apiKey":"...","authDomain":"...","projectId":"...", ...}
       - name: Inject Firebase config
         env:
           FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         run: |
           mkdir -p src/environments
-          printf 'export const firebaseConfig = %s as const;\n' "$FIREBASE_CONFIG" \
-            > src/environments/firebase.config.ts
+          if [ -z "$FIREBASE_CONFIG" ]; then
+            echo "::error::FIREBASE_CONFIG secret is empty or not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          node -e '
+            const c = process.env.FIREBASE_CONFIG;
+            let parsed;
+            try { parsed = JSON.parse(c); }
+            catch (e) {
+              console.error("::error::FIREBASE_CONFIG is not valid JSON. It must be a single JSON object with quoted keys, e.g. {\"apiKey\":\"...\",\"projectId\":\"...\"}. Parse error: " + e.message);
+              process.exit(1);
+            }
+            require("fs").writeFileSync(
+              "src/environments/firebase.config.ts",
+              "export const firebaseConfig = " + JSON.stringify(parsed) + " as const;\n"
+            );
+            console.log("Wrote firebase.config.ts with keys: " + Object.keys(parsed).join(", "));
+          '
 
       # base-href must match the repo name for project pages.
       - run: npx ng build --base-href=/beach-checklist/
